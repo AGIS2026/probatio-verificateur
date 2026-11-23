@@ -1,6 +1,8 @@
 # PROBATIO · Vérificateur de correspondances exactes en Lean 4
 
-**Résultat du 23 novembre 2026.** Lean 4.15.0 a vérifié les deux théorèmes sur les volumes déjà décodés et les cinq exemples de la démonstration. Lean déclare uniquement `propext` et `Quot.sound` pour chacun des deux théorèmes. Les 15 tests du vérificateur Python ont également réussi. [Commit vérifié](https://github.com/AGIS2026/probatio-verificateur/commit/c6ef29cd685ed583e21f521d28a97e96cf1b4c83) · [Exécution GitHub Actions](https://github.com/AGIS2026/probatio-verificateur/actions/runs/45186415850) · [Journal Lean et axiomes](https://github.com/AGIS2026/probatio-verificateur/actions/runs/45186415850/job/137733075643)
+**Version [v0.1.0](https://github.com/AGIS2026/probatio-verificateur/releases/tag/v0.1.0) du 23 novembre 2026.** Sur le [commit `bb2009b`](https://github.com/AGIS2026/probatio-verificateur/commit/bb2009b1b0484daf08f2def51b09423b9b5e8ea8), Lean 4.15.0 a vérifié les deux théorèmes sur les volumes déjà décodés et les cinq exemples. Les 15 tests Python ont également réussi. [Vérification de la version](https://github.com/AGIS2026/probatio-verificateur/actions/runs/45186615291)
+
+Le module `Probatio.Verificateur` a ensuite été rejoué par `lean4checker --fresh` sur ce même commit. Ce rejeu utilise le noyau de Lean dans un environnement neuf. Les seuls axiomes déclarés pour chacun des deux théorèmes sont `propext` et `Quot.sound`. [Journal du rejeu et des axiomes](https://github.com/AGIS2026/probatio-verificateur/actions/runs/45198118419/job/137773935599)
 
 **English summary.** Lean 4.15.0 verified the exact-match report checker for decoded volumes and its key-filtered variant. The result holds for every grouping key, including a constant key. The Python file reader and streaming checker have their own tests. Their equivalence to the Lean functions remains unproved.
 
