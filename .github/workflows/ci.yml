@@ -25,11 +25,13 @@ jobs:
           fi
 
       - name: Compiler avec la version du fichier lean-toolchain
-        uses: leanprover/lean-action@v1
+        uses: leanprover/lean-action@ba3fdfe5c4476c925da13bf11a005ddb47e47aee
         with:
           auto-config: 'false'
           build: 'true'
           use-github-cache: 'false'
+          leanchecker: 'true'
+          leanchecker-args: '--fresh --verbose Probatio.Verificateur'
 
       - name: Vérifier les deux listes d'axiomes
         run: |
@@ -56,3 +58,42 @@ jobs:
       - name: Tests du vérificateur en flux
         working-directory: python
         run: python -B -m unittest -v test_flux
+
+  archive:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Comparer le ZIP source de GitHub au commit du tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          zip_path="$RUNNER_TEMP/release.zip"
+          gh api "repos/$GITHUB_REPOSITORY/zipball/$GITHUB_REF_NAME" > "$zip_path"
+          python3 - "$zip_path" <<'PY'
+          import os
+          import subprocess
+          import sys
+          from zipfile import ZipFile
+
+          tag = os.environ["GITHUB_REF_NAME"]
+          sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          paths = subprocess.check_output(["git", "ls-tree", "-rz", "--name-only", sha])
+          files = paths.decode().split("\0")[:-1]
+          notice = "Copyright 2026 Abdelmadjid Djemaï"
+          with ZipFile(sys.argv[1]) as archive:
+              names = [f.filename for f in archive.infolist() if not f.is_dir()]
+              prefixes = {name.partition("/")[0] for name in names}
+              assert len(prefixes) == 1, "Préfixe d’archive inattendu"
+              prefix = prefixes.pop() + "/"
+              assert sorted(names) == sorted(prefix + p for p in files), "Inventaire différent"
+              for path in files:
+                  expected = subprocess.check_output(["git", "show", f"{sha}:{path}"])
+                  assert archive.read(prefix + path) == expected, path
+              for path in ["LICENSE", f"RELEASES/{tag}.md"]:
+                  assert notice in archive.read(prefix + path).decode().splitlines(), path
+          print(f"{tag} {sha}: {len(files)} fichiers identiques, licence et titulaire vérifiés.")
+          PY
