@@ -1,10 +1,10 @@
 # PROBATIO · Vérificateur de correspondances exactes en Lean 4
 
-**Statut de cette révision.** Deux démonstrations sont proposées pour Lean 4.15.0. Leur première compilation reste à établir. Le résultat des tests Python est distinct. Une fois la CI réussie, rattacher le résultat au commit et à son journal d’axiomes.
+**Résultat du 23 novembre 2026.** Lean 4.15.0 a vérifié les deux théorèmes sur les volumes déjà décodés et les cinq exemples de la démonstration. Lean déclare uniquement `propext` et `Quot.sound` pour chacun des deux théorèmes. Les 15 tests du vérificateur Python ont également réussi. [Commit vérifié](https://github.com/AGIS2026/probatio-verificateur/commit/c6ef29cd685ed583e21f521d28a97e96cf1b4c83) · [Exécution GitHub Actions](https://github.com/AGIS2026/probatio-verificateur/actions/runs/45186415850) · [Journal Lean et axiomes](https://github.com/AGIS2026/probatio-verificateur/actions/runs/45186415850/job/137733075643)
 
-**English summary.** This project proposes two Lean 4 proofs about an exact-match report over decoded volumes. It includes a reference checker and a variant that filters candidates by any key, including a constant key. Kernel verification of this revision is pending.
+**English summary.** Lean 4.15.0 verified the exact-match report checker for decoded volumes and its key-filtered variant. The result holds for every grouping key, including a constant key. The Python file reader and streaming checker have their own tests. Their equivalence to the Lean functions remains unproved.
 
-## Énoncés à vérifier
+## Énoncés vérifiés en Lean
 
 Sur des volumes déjà décodés (forme XYZ et valeurs binary64 canoniques) :
 
