@@ -1,0 +1,38 @@
+name: Rejeu des preuves v0.1.0
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/rejeu-v0.1.0.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  rejeu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extraire la version v0.1.0
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/v0.1.0
+          persist-credentials: false
+      - name: Vérifier le commit de la version
+        run: |
+          git rev-parse HEAD
+          test "$(git rev-parse HEAD)" = bb2009b1b0484daf08f2def51b09423b9b5e8ea8
+      - name: Rejouer le module des deux théorèmes dans un environnement Lean neuf
+        uses: leanprover/lean-action@ba3fdfe5c4476c925da13bf11a005ddb47e47aee
+        with:
+          auto-config: 'false'
+          build: 'true'
+          use-github-cache: 'false'
+          leanchecker: 'true'
+          leanchecker-args: '--fresh --verbose Probatio.Verificateur'
+      - name: Contrôler les axiomes des deux théorèmes rejoués
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean Axiomes.lean | tee axiomes.txt
+          python3 scripts/verifier_axiomes.py axiomes.txt
