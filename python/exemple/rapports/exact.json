@@ -1,0 +1,14 @@
+{
+  "profil": "FLUX-CANON-R02",
+  "manifeste_sha256": "5bf51e8dfbeb63ac0a324d9ee95e7dd2366ac1c1514240f822b16ed464891003",
+  "paires": [
+    [
+      "S0000",
+      "B01"
+    ],
+    [
+      "S0000",
+      "B02"
+    ]
+  ]
+}

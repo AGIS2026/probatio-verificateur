@@ -1,0 +1,32 @@
+{
+  "profil": "FLUX-CANON-R02",
+  "A": [
+    {
+      "id": "S0000",
+      "taille": 368,
+      "sha256": "6330b33854d36140de749253f250be3e242880f809f995ea19b75f0a846555ab"
+    },
+    {
+      "id": "A02",
+      "taille": 368,
+      "sha256": "2474659436cc7a9ca37895a655a15028c78391f14c9448639d0f69be40a41dd2"
+    }
+  ],
+  "B": [
+    {
+      "id": "B01",
+      "taille": 384,
+      "sha256": "88b73b5ff6cc24175482a2dff6639c47b0acc91d49a669d5a31b14f08e1b9ca4"
+    },
+    {
+      "id": "B02",
+      "taille": 368,
+      "sha256": "b03d92d7af1b2079a223a95b8ba6756db94435457c810d62b72eb50dcc38feb7"
+    },
+    {
+      "id": "B03",
+      "taille": 368,
+      "sha256": "3eab523709a14fdb6886de84031e12d5f78aef72fa7e53e1273fe7ea95bb3294"
+    }
+  ]
+}
