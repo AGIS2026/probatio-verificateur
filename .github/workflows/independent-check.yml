@@ -1,0 +1,79 @@
+name: Independent proof check
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nanoda:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: leanprover/lean-action@ba3fdfe5c4476c925da13bf11a005ddb47e47aee
+        with:
+          auto-config: 'false'
+          build: 'true'
+          use-github-cache: 'false'
+      - uses: actions/checkout@v4
+        with:
+          repository: leanprover/lean4export
+          ref: 20c4a64aa1b76f7c79a6db15d089084359f8c3dc
+          path: .ci-tools/exporter
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ammkrn/nanoda_lib
+          ref: 0da9f98feadd3a0a2ef4b3dbcf52a298a6fef929
+          path: .ci-tools/nanoda
+          persist-credentials: false
+      - name: Build pinned tools and check both exported proofs
+        run: |
+          set -euo pipefail
+          cmp lean-toolchain .ci-tools/exporter/lean-toolchain
+          (cd .ci-tools/exporter && lake build)
+          (cd .ci-tools/nanoda && cargo build --release --locked --bin nanoda_bin)
+          work="$RUNNER_TEMP/probatio-nanoda"
+          mkdir -p "$work"
+          lake env .ci-tools/exporter/.lake/build/bin/lean4export Probatio.Verificateur -- \
+            Probatio.verifier_correct Probatio.verifierCle_correct > "$work/proofs.ndjson"
+          python3 scripts/check_export.py "$work/proofs.ndjson"
+          cat > "$work/config.json" <<'JSON'
+          {
+            "use_stdin": true,
+            "permitted_axioms": ["propext", "Quot.sound"],
+            "unpermitted_axiom_hard_error": true,
+            "nat_extension": true,
+            "string_extension": true,
+            "pp_to_stdout": true,
+            "pp_declars": ["Probatio.verifier_correct", "Probatio.verifierCle_correct"],
+            "pp_options": {"proofs": false},
+            "print_success_message": true
+          }
+          JSON
+          .ci-tools/nanoda/target/release/nanoda_bin "$work/config.json" < "$work/proofs.ndjson" | tee "$work/verdict.txt"
+          grep -Ex 'Checked [1-9][0-9]* declarations with no errors' "$work/verdict.txt"
+          sha256sum "$work/proofs.ndjson"
+          if git rev-parse --verify -q 'refs/tags/v0.1.1^{commit}' >/dev/null && \
+             git diff --quiet v0.1.1 HEAD -- Probatio.lean Probatio lean-toolchain lakefile.toml lake-manifest.json; then
+            echo "Lean sources and build configuration match release v0.1.1 at $(git rev-parse 'v0.1.1^{commit}')."
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nanoda-proof-export
+          path: |
+            ${{ runner.temp }}/probatio-nanoda/proofs.ndjson
+            ${{ runner.temp }}/probatio-nanoda/config.json
+            ${{ runner.temp }}/probatio-nanoda/verdict.txt
+          if-no-files-found: error
